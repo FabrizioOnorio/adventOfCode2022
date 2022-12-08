@@ -7,8 +7,8 @@ let totalCount = numberOfTreesInEdges;
 puzzle.forEach((lineOfTrees, index) => {
 	if (index > 0 && index < puzzle.length - 1) {
 		lineOfTrees.split("").forEach((tree, treeIndex, lineOfTreesArray) => {
-      if (treeIndex > 0 && treeIndex < lineOfTreesArray.length - 1) {
-        let isVisible = false;
+			if (treeIndex > 0 && treeIndex < lineOfTreesArray.length - 1) {
+				let isVisible = false;
 				// check from the top
 				if (!isVisible) {
 					const checkFromTop = puzzle.slice(0, index);
@@ -18,17 +18,16 @@ puzzle.forEach((lineOfTrees, index) => {
 					});
 					if (visibleFromTop) isVisible = true;
 				}
-
+				//check from the right
 				if (!isVisible) {
-					//check from the right
 					const checkFromRight = lineOfTreesArray.slice(treeIndex + 1);
 					let visibleFromRight = true;
 					checkFromRight.forEach((treeAtTheFront) => {
-						if (Number(treeAtTheFront) >= Number(tree)) visibleFromRight = false;
+						if (Number(treeAtTheFront) >= Number(tree))
+							visibleFromRight = false;
 					});
 					if (visibleFromRight) isVisible = true;
 				}
-
 				// check from the buttom
 				if (!isVisible) {
 					const checkFromButtom = puzzle.slice(index + 1);
@@ -39,7 +38,6 @@ puzzle.forEach((lineOfTrees, index) => {
 					});
 					if (visibleFromButtom) isVisible = true;
 				}
-
 				// check from the  left
 				if (!isVisible) {
 					const checkFromLeft = lineOfTreesArray.slice(0, treeIndex);
@@ -49,11 +47,12 @@ puzzle.forEach((lineOfTrees, index) => {
 					});
 					if (visibleFromLeft) isVisible = true;
 				}
-          // console.log({index, treeIndex, tree, isVisible})
 				if (isVisible) totalCount++;
 			}
 		});
 	}
 });
-
+// solution 1
 console.log(totalCount);
+
+

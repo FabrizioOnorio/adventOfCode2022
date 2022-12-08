@@ -1,46 +1,49 @@
 import { readFileSync } from "fs";
 const puzzle = readFileSync("./input.txt").toString().split(/\r?\n/);
 
-puzzle.forEach((command, index) => {
-	if (command[2] === "c") {
-		const directoryName = `${puzzle[index].split(" ")[2]}`;
-		if (directoryName !== "..") {
-			directoryName = { childs: [] };
-		}
-	}
-	if (command === "$ ls") {
-		const listOfFIles = puzzle.slice(index + 1);
-		const nextCommand = listOfFIles.indexOf(
-			listOfFIles.find((element) => element[0] === "$")
-		);
-		const directoryName = `dir ${puzzle[index - 1].split(" ")[2]}`;
-		fileStructure[location] = {};
-		listOfFIles.splice(nextCommand);
-		listOfFIles.forEach((string) => {
-			if (string[0] === "d") directoryName = {childs: []};
-			if (string[0] !== "d") {
-				fileStructure[directoryName][string.split(" ")[1]] = Number([
-					string.split(" ")[0],
-				]);
+const executeCommand = (command, currentDir) => {
+	if (command.at(0) === "$") {
+		const [, ist, target] = command.split(" ");
+		if (ist === "cd") {
+			switch (target) {
+				case "/": // CREATE ROOT
+					return { name: "/", subDirectories: [], files: [] };
+				case "..": // GO TO PARENT DIR
+					return currentDir.parent;
+				default: // GO TO SUB DIR
+					return currentDir.subDirectories.find((d) => d.name === target);
 			}
-		});
+		}
+		return currentDir;
 	}
-});
-console.log(fileStructure);
-const arrayroot = Object.keys(fileStructure["dir /"]);
-const arrayRootFiltered = arrayroot.filter(
-	(key) => key.split(" ")[0] === "dir"
-);
-arrayRootFiltered.forEach((dir) => {
-	fileStructure["dir /"][dir] = fileStructure[dir];
-});
+	const [size, name] = command.split(" ");
+	if (size === "dir") {
+		currentDir.subDirectories.push({
+			name,
+			subDirectories: [],
+			files: [],
+			parent: currentDir,
+		});
+	} else {
+		currentDir.files.push({ name, size: parseInt(size) });
+	}
+	return currentDir;
+};
 
-arrayroot.forEach((string) => {
-	const array = Object.keys(fileStructure["dir /"][string]);
-	const arrayFiltered = array.filter((key) => key.split(" ")[0] === "dir");
-	arrayFiltered.forEach((dir) => {
-		fileStructure["dir /"][string][dir] = fileStructure[dir];
+const filesSize = (dir) => dir.files.reduce((acc, curr) => acc + curr.size, 0);
+
+const directorySize = (dir) =>
+	dir.subDirectories.reduce(
+		(acc, curr) => acc + directorySize(curr),
+		filesSize(dir)
+	);
+
+const buildDirectoryTree = (commands) => {
+	const dirs = new Set([]);
+	let currentDir;
+	commands.forEach((command) => {
+		currentDir = executeCommand(command, currentDir);
+		dirs.add(currentDir);
 	});
-});
-
-console.log(fileStructure);
+	return dirs;
+};
